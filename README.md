@@ -21,7 +21,7 @@ git clone https://github.com/gustiarto/mutasi-qris.id && cd mutasi-qris.id
 ### 2. Prepare QRIS Login Cookies
 Since the QRIS dashboard uses anti-bot protection and ReCaptcha, automatic login is not supported. Please follow these steps:
 
-1. Open your browser on your local PC and log in to the [QRIS dashboard](https://merchant.qris.interactive.co.id/v2/m/kontenr.php?idir=pages/historytrx.php).
+1. Open your browser on your local PC and log in to the [QRIS dashboard](https://merchant.qris.interactive.co.id/v2/m/login/).
 2. After logging in, open DevTools (F12) > Console.
 3. Paste and run the following JavaScript to export all cookies as JSON:
 ```javascript
