@@ -20,12 +20,15 @@ git clone <repo-url> && cd mutasi-qris.id
 Since the QRIS dashboard uses anti-bot protection and ReCaptcha, automatic login is not supported. Please follow these steps:
 
 1. Open your browser on your local PC and log in to the [QRIS dashboard](https://merchant.qris.interactive.co.id/v2/m/kontenr.php?idir=pages/historytrx.php).
-2. After logging in, open DevTools (F12) > Application (Chrome) > Cookies > merchant.qris.interactive.co.id.
-3. Export all cookies (use an extension like EditThisCookie or copy manually).
-4. Save the cookies to a file named `qris-cookies.json` in the project folder, using an array of cookie objects, for example:
+2. After logging in, open DevTools (F12) > Console.
+3. Paste and run the following JavaScript to export all cookies as JSON:
+```javascript
+copy(JSON.stringify(document.cookie.split('; ').map(c => { const [name, ...v] = c.split('='); return { name, value: v.join('=') }; })))
+```
+4. Paste the copied JSON into a file named `qris-cookies.json` in the project folder. If needed, add the domain property manually for each cookie:
 ```json
 [
-  {"name": "PHPSESSID", "value": "...", "domain": ".qris.interactive.co.id", ...},
+  { "name": "PHPSESSID", "value": "...", "domain": ".qris.interactive.co.id" },
   ...
 ]
 ```
