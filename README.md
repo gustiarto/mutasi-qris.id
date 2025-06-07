@@ -15,7 +15,7 @@ Automate the retrieval of incoming QRIS payment transaction history from the mer
 
 ### 1. Clone/Download the Project
 ```
-git clone <repo-url> && cd mutasi-qris.id
+git clone [<repo-url>](https://github.com/gustiarto/mutasi-qris.id) && cd mutasi-qris.id
 ```
 
 ### 2. Prepare QRIS Login Cookies
