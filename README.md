@@ -8,6 +8,7 @@ Automate the retrieval of incoming QRIS payment transaction history from the mer
 - Stores and reuses login cookies so you don't need to log in manually every time.
 - Automatic instructions if cookies are missing or the session is expired.
 - Ready to run in Docker for modern server/infra needs.
+- **HTTP API endpoint with Bearer token authorization for secure integration.**
 
 - Docker (recommended for production deployment)
 - Or: Node.js 18+ (for local development/testing)
@@ -35,15 +36,34 @@ copy(JSON.stringify(document.cookie.split('; ').map(c => { const [name, ...v] = 
 ]
 ```
 
-### 3. Build and Run in Docker
+### 3. Build and Run in Docker (Recommended)
+Set your API token for secure access to the HTTP endpoint:
 ```
 docker build -t mutasi-qris .
-docker run --rm -v %cd%:/app mutasi-qris
+docker run --rm -p 3030:3030 -e QRIS_API_TOKEN=yourtoken -v %cd%:/app mutasi-qris
 ```
 - For Linux/Mac use `$(pwd)` instead of `%cd%`.
-- The script will automatically use the existing cookies, fetch mutation data, and display the results in the log.
+- Replace `yourtoken` with a strong secret token of your choice.
+- The service will be available at `http://localhost:3030/fetch` and requires Bearer token authentication.
 
-### 4. Update Cookies If Session Expires
+### 4. Run Locally (Node.js)
+```
+npm install
+set QRIS_API_TOKEN=yourtoken  # Windows
+# export QRIS_API_TOKEN=yourtoken  # Linux/Mac
+node fetch-qris.js
+```
+
+### 5. Fetch QRIS Data via HTTP API
+Send a GET request to `/fetch` with your Bearer token:
+
+```bash
+curl -H "Authorization: Bearer yourtoken" http://localhost:3030/fetch
+```
+- Replace `yourtoken` with the value you set in `QRIS_API_TOKEN`.
+- Response will be JSON with the latest QRIS transaction data.
+
+### 6. Update Cookies If Session Expires
 If the log displays manual instructions, repeat step 2 to update the cookies.
 
 ## License
