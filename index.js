@@ -8,17 +8,24 @@ const API_TOKEN = process.env.QRIS_API_TOKEN || 'changeme';
 
 const COOKIES_PATH = 'qris-cookies.json';
 
+console.log('Starting QRIS Mutasi Fetch Service...');
+console.log('PORT:', PORT);
+console.log('API_TOKEN:', API_TOKEN);
+console.log('COOKIES_PATH:', COOKIES_PATH);
+
 async function fetchQrisData() {
   const browser = await puppeteer.launch({ headless: true });
   const page = await browser.newPage();
   let result = null;
   try {
     if (fs.existsSync(COOKIES_PATH)) {
+      console.log('Cookies file found, loading cookies...');
       const cookies = JSON.parse(fs.readFileSync(COOKIES_PATH, 'utf8'));
       await page.setCookie(...cookies);
       await page.goto('https://merchant.qris.interactive.co.id/v2/m/kontenr.php?idir=pages/historytrx.php', { waitUntil: 'networkidle2' });
       const isLoggedIn = await page.evaluate(() => !!document.querySelector('body'));
       if (isLoggedIn) {
+        console.log('Login session valid, fetching QRIS data...');
         await new Promise(resolve => setTimeout(resolve, 3000));
         result = await page.evaluate(async () => {
           const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || window.X_TOKEN_CSRF || '';
@@ -129,12 +136,18 @@ async function fetchQrisData() {
           });
           return await res.json();
         });
+        console.log('QRIS data fetched successfully.');
       } else {
+        console.error('Cookies tidak valid atau session sudah expired.');
         throw new Error('Cookies tidak valid atau session sudah expired.');
       }
     } else {
+      console.error('File cookies tidak ditemukan. Ikuti instruksi di README untuk membuat qris-cookies.json.');
       throw new Error('File cookies tidak ditemukan. Ikuti instruksi di README untuk membuat qris-cookies.json.');
     }
+  } catch (err) {
+    console.error('Error in fetchQrisData:', err);
+    throw err;
   } finally {
     await browser.close();
   }
@@ -144,17 +157,26 @@ async function fetchQrisData() {
 // Middleware auth
 function authMiddleware(req, res, next) {
   const auth = req.headers['authorization'] || '';
-  if (!auth.startsWith('Bearer ')) return res.status(401).json({ error: 'Unauthorized' });
+  console.log('Incoming Authorization header:', auth);
+  if (!auth.startsWith('Bearer ')) {
+    console.warn('No Bearer token provided.');
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
   const token = auth.replace('Bearer ', '').trim();
-  if (token !== API_TOKEN) return res.status(403).json({ error: 'Forbidden' });
+  if (token !== API_TOKEN) {
+    console.warn('Invalid Bearer token:', token);
+    return res.status(403).json({ error: 'Forbidden' });
+  }
   next();
 }
 
 app.get('/fetch', authMiddleware, async (req, res) => {
   try {
+    console.log('Received /fetch request');
     const data = await fetchQrisData();
     res.json(data);
   } catch (err) {
+    console.error('Error in /fetch:', err);
     res.status(500).json({ error: err.message });
   }
 });
