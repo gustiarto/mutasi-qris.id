@@ -19,52 +19,47 @@ Automate the retrieval of incoming QRIS payment transaction history from the mer
 git clone https://github.com/gustiarto/mutasi-qris.id && cd mutasi-qris.id
 ```
 
-### 2. Prepare QRIS Login Cookies
-Since the QRIS dashboard uses anti-bot protection and ReCaptcha, automatic login is not supported. Please follow these steps:
+### 2. Prepare QRIS Login Cookies (IMPORTANT)
+**JANGAN gunakan script `document.cookie`!**
+Agar session login valid, cookies harus diekspor dari DevTools tab Application, bukan dari JavaScript.
 
-1. Open your browser on your local PC and log in to the [QRIS dashboard](https://merchant.qris.interactive.co.id/v2/m/login/).
-2. After logging in, open DevTools (F12) > Console.
-3. Paste and run the following JavaScript to export all cookies as JSON:
-```javascript
-copy(JSON.stringify(document.cookie.split('; ').map(c => { const [name, ...v] = c.split('='); return { name, value: v.join('=') }; })))
-```
-4. Paste the copied JSON into a file named `qris-cookies.json` in the project folder. If needed, add the domain property manually for each cookie:
+1. Login ke [QRIS dashboard](https://merchant.qris.interactive.co.id/v2/m/login/) di browser.
+2. Tekan F12, buka tab **Application** (atau Storage di Firefox), lalu klik **Cookies** > pilih `merchant.qris.interactive.co.id`.
+3. Pilih semua baris cookies, klik kanan lalu **Export as JSON** (atau copy-paste manual ke Notepad, lalu simpan sebagai `qris-cookies.json`).
+4. Pastikan file `qris-cookies.json` berisi array JSON dengan atribut lengkap: `name`, `value`, `domain`, `path`, `httpOnly`, `secure`, dst. Contoh:
 ```json
 [
-  { "name": "PHPSESSID", "value": "...", "domain": ".qris.interactive.co.id" },
-  ...
+  { "name": "PHPSESSID", "value": "...", "domain": "merchant.qris.interactive.co.id", "path": "/", "httpOnly": true, "secure": true }
 ]
 ```
+> **Penting:** Cookie PHPSESSID harus ada dan httpOnly agar session login valid.
 
 ### 3. Build and Run in Docker (Recommended)
 Set your API token for secure access to the HTTP endpoint:
 ```
 docker build -t mutasi-qris .
-docker run --rm -p 3030:3030 -e QRIS_API_TOKEN=yourtoken -v %cd%:/app mutasi-qris
+docker run --rm -p 3030:3030 -e QRIS_API_TOKEN=yourtoken -v "${PWD}/qris-cookies.json:/app/qris-cookies.json" mutasi-qris
 ```
-- For Linux/Mac use `$(pwd)` instead of `%cd%`.
-- Replace `yourtoken` with a strong secret token of your choice.
-- The service will be available at `http://localhost:3030/fetch` and requires Bearer token authentication.
+- Ganti `yourtoken` dengan token rahasia Anda.
+- Service tersedia di `http://localhost:3030/fetch` (gunakan Bearer token).
 
 ### 4. Run Locally (Node.js)
 ```
 npm install
-set QRIS_API_TOKEN=yourtoken  # Windows
+$env:QRIS_API_TOKEN="yourtoken"  # PowerShell
 # export QRIS_API_TOKEN=yourtoken  # Linux/Mac
-node fetch-qris.js
+npm run dev   # untuk development (auto-reload)
+npm run prod  # untuk production
 ```
 
 ### 5. Fetch QRIS Data via HTTP API
-Send a GET request to `/fetch` with your Bearer token:
-
+Kirim GET ke `/fetch` dengan Bearer token:
 ```bash
 curl -H "Authorization: Bearer yourtoken" http://localhost:3030/fetch
 ```
-- Replace `yourtoken` with the value you set in `QRIS_API_TOKEN`.
-- Response will be JSON with the latest QRIS transaction data.
 
 ### 6. Update Cookies If Session Expires
-If the log displays manual instructions, repeat step 2 to update the cookies.
+Jika session expired, ulangi langkah 2 untuk update cookies.
 
 ## License
 
