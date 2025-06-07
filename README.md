@@ -38,7 +38,7 @@ Agar session login valid, cookies harus diekspor dari DevTools tab Application, 
 Set your API token for secure access to the HTTP endpoint:
 ```
 docker build -t mutasi-qris .
-docker run --rm -p 3030:3030 -e QRIS_API_TOKEN=yourtoken -v "${PWD}/qris-cookies.json:/app/qris-cookies.json" mutasi-qris
+docker run -d -p 3030:3030 -e QRIS_API_TOKEN=yourtoken -v "${PWD}/qris-cookies.json:/app/qris-cookies.json" mutasi-qris
 ```
 - Ganti `yourtoken` dengan token rahasia Anda.
 - Service tersedia di `http://localhost:3030/fetch` (gunakan Bearer token).
