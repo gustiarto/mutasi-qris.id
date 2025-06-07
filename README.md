@@ -1,5 +1,7 @@
 # mutasi-qris.id
 
+**Automated QRIS transaction mutation fetcher for merchant.qris.interactive.co.id, ready for Docker deployment.**
+
 Automate the retrieval of incoming QRIS payment transaction history from the merchant dashboard at merchant.qris.interactive.co.id on a scheduled basis, so that mutation data can be integrated into other systems (notifications, webhooks, etc.) without official API access.
 
 - Automated QRIS mutation data fetch using Node.js and Puppeteer (headless browser).
