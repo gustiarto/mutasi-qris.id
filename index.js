@@ -28,6 +28,14 @@ async function fetchQrisData() {
         console.log('Login session valid, fetching QRIS data...');
         await new Promise(resolve => setTimeout(resolve, 3000));
         result = await page.evaluate(async () => {
+          function getTodayRange() {
+            const now = new Date();
+            const pad = n => n.toString().padStart(2, '0');
+            const d = pad(now.getDate());
+            const m = pad(now.getMonth() + 1);
+            const y = now.getFullYear();
+            return `${d}/${m}/${y} - ${d}/${m}/${y}`;
+          }
           const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || window.X_TOKEN_CSRF || '';
           const formData = new URLSearchParams({
             draw: "3",
@@ -116,7 +124,7 @@ async function fetchQrisData() {
             length: "5",
             "search[value]": "",
             "search[regex]": "false",
-            range: "07/06/2025 - 07/06/2025",
+            range: getTodayRange(),
             item: "",
             item_search: "",
             status: "all",
